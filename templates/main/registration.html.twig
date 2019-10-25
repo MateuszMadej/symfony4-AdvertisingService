@@ -1,13 +1,75 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MainController!{% endblock %}
+{% block title %}Rejestracja{% endblock %}
 
 {% block body %}
 
-{# include navbar #}
+{# include navbar here #}
 
-<style>
-    
-</style>
-registration page
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+  <div class="col-md-6 offset-md-3">
+    <div class="content-section">
+      <form method="POST" action="/registration">
+        <fieldset class="form-group">
+          <center><legend class="border-bottom mb-4">Rejestracja</legend></center>
+          <div class="form-group">
+            <label class="form-control-label">Email</label>
+            <input class="form-control form-control-lg" id="email" name="email" required type="text" value="">
+          </div>
+          {% if errorMail is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Podany email jest już zajęty!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          <div class="form-group">
+            <label class="form-control-label">Hasło</label>
+            <input class="form-control form-control-lg" id="password" name="password" required type="password" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Powtórz hasło</label>
+            <input class="form-control form-control-lg" id="repassword" name="repassword" required type="password" value="">
+          </div>
+          {% if errorPassword is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Hasło musi składać się z minimum 8 znaków!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          {% if errorRePassword is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Podane hasła są różne!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          <div class="form-group">
+            <label class="form-control-label">Imię</label>
+            <input class="form-control form-control-lg" id="name" name="name" required type="text" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Nazwisko</label>
+            <input class="form-control form-control-lg" id="surname" name="surname" required type="text" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Numer telefonu</label>
+            <input class="form-control form-control-lg" id="phone" name="phone" required type="text" value="">
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <center>
+            <input class="btn btn-secondary" id="add" name="add" type="submit" value="Zarejestruj">
+          </center>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

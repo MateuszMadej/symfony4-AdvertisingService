@@ -1,13 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MainController!{% endblock %}
+{% block title %}Logowanie{% endblock %}
 
 {% block body %}
 
-{# include navbar #}
+{# include navbar here #}
 
-<style>
-    
-</style>
-login page
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+ 	<div class="col-md-6 offset-md-3">
+    <div class="content-section">
+      <form method="POST" action="/login">
+        <fieldset class="form-group">
+          <center><legend class="border-bottom mb-4">Logowanie</legend></center>
+          <div class="form-group">
+            <label class="form-control-label">Email</label>
+            <input class="form-control form-control-lg" id="email" name="email" required type="text" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Hasło</label>
+            <input class="form-control form-control-lg" id="password" name="password" required type="password" value="">
+          </div>
+          {% if errorLogin == TRUE %}
+				    <div class="alert alert-danger" align="center" role="alert">
+    				  <font size="4">
+        				  <b>Złe dane logowania! Spróbuj ponownie!</b></br>
+    				  </font>
+				    </div>
+          {% endif %}
+        </fieldset>
+        <div class="form-group">
+          <center>
+            <input class="btn btn-secondary" id="login" name="login" type="submit" value="Zaloguj">
+          </center>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
