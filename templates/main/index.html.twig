@@ -1,13 +1,26 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MainController!{% endblock %}
+{% block title %}Strona główna{% endblock %}
 
 {% block body %}
 
 {# include navbar #}
+{% if currentUser == FALSE %}
+	{% include 'navbars/guestNavbar.html.twig' %}
+{% endif %}
+{% if currentUser.userType is defined %}
+	{% if currentUser.userType == "user" %}
+		{% include 'navbars/userNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType == "admin" %}
+		{% include 'navbars/adminNavbar.html.twig' %}
+	{% endif %}
+{% endif %}
 
 <style>
     
 </style>
+
 main page
+
 {% endblock %}
