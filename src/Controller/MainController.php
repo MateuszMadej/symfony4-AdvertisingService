@@ -21,7 +21,6 @@ class MainController extends AbstractController
         if($session->get('currentUser'))
         {
             $currentUser = $session->get('currentUser');
-            // dump($currentUser);
         }
         else
         {
@@ -153,10 +152,83 @@ class MainController extends AbstractController
     }
 
     /**
-     * @Route("/profile", name="profile")
+     * @Route("/usersAds", name="usersAds")
      */
-    public function profile()
+    public function usersAds(SessionInterface $session)
     {
-        return $this->render('main/profile.html.twig');
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        // users ads panel
+
+        return $this->render('main/usersAds.html.twig', [
+                'currentUser' => $currentUser,
+            ]); 
     }
+
+    /**
+     * @Route("/manageAds", name="manageAds")
+     */
+    public function manageAds(SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        // admin panel for manage ads
+
+        return $this->render('main/manageAds.html.twig', [
+                'currentUser' => $currentUser,
+            ]); 
+    }
+
+    /**
+     * @Route("/manageUsers", name="manageUsers")
+     */
+    public function manageUsers(SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        // admin panel for manage users
+
+        return $this->render('main/manageUsers.html.twig', [
+                'currentUser' => $currentUser,
+            ]); 
+    }
+
+
 }

@@ -1,24 +1,20 @@
 {% block body %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="/">Navbar w/ text</a>
+  <a class="navbar-brand" href="/"><b>Nazwa aplikacji</b></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarText">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="/">Strona główna</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/login">Zaloguj</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/registration">Rejestracja</a>
+        <a class="nav-link" href="/"><b>Strona główna</b></a>
       </li>
     </ul>
     <span class="navbar-text">
-      Nie jesteś zalogowany.
+      Nie jesteś zalogowany &nbsp;&nbsp;&nbsp;&nbsp;
     </span>
+      <a class="btn btn-light navbar-btn" href="/login">Logowanie</a> &nbsp;&nbsp;
+      <a class="btn btn-light navbar-btn" href="/registration">Rejestracja</a>
   </div>
 </nav>
 {% endblock %}
