@@ -17,6 +17,131 @@
 	{% endif %}
 {% endif %}
 
-panel admina do zarzadzania uzytkownikami
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <form method="POST" action="/manageUsers">
+            <fieldset class="form-group">
+              <div class="form-row">
+                <legend class="border-bottom mb-4">Użytkownicy</legend>
+                <div class="col-10">
+                  <div class="form-group">
+                      <label class="form-control-label">Adres email (opcjonalnie)</label>
+                      <input class="form-control form-control-lg" id="email" name="email" type="text" value="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Ilość </label>
+                      <select id="inputState" name="inputState" class="form-control form-control-lg">
+                          <option>5</option>
+                          <option>10</option>
+                          <option>25</option>
+                          <option>50</option>
+                          <option>100</option>
+                          <option>250</option>
+                          <option>500</option>
+                      </select>
+                  </div>
+              </div>
+              </div>
+            </fieldset>
+            <div class="form-group">
+                <center>
+                    <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj"> 
+                </center>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="table table-striped">
+  	<thead>
+   		<tr class="table-secondary">
+      		<th scope="col">#</th>
+      		<th scope="col">Email</th>
+      		<th scope="col">Imię</th>
+		    <th scope="col">Nazwisko</th>
+		    <th scope="col">Numer telefonu</th>
+		    <th scope="col">Miasto</th>
+		    <th scope="col">Typ użytkownika</th>
+		    <th scope="col"></th>
+		    <th scope="col"></th>
+   		</tr>
+  	</thead>
+
+  	<tbody>
+  		{% if searchCounter is defined and email == "" %}
+  			{% set limit = 1 %}
+  			{% for user in findUsers if limit != searchCounter+1 %}
+  				<tr>
+	                <td>{{limit}}</td>
+	                <td>{{user.email}}</td>
+	                <td>{{user.name}}</td>
+	                <td>{{user.surname}}</td>
+	                <td>{{user.phoneNumber}}</td>
+	                <td>{{user.city}}</td>
+	                <td>{{user.userType}}</td> 
+	                <td><a href="/editUser/{{user.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
+	                {% if user.blocked == FALSE %}
+		                <td><a href="/blockUser/{{user.id}}" class="btn btn-danger btn-sm btn-block">Zablokuj</a></td>
+		            {% endif %}
+		            {% if user.blocked == TRUE %}
+	                	<td><a href="/blockUser/{{user.id}}" class="btn btn-success btn-sm btn-block">Odblokuj</a></td>
+	                {% endif %}
+	            </tr>
+  			{% set limit = limit+1 %}
+      		{% endfor %}
+      	{% endif %}
+
+      	{% if searchCounter is defined and email != "" %}
+  			{% set limit = 1 %}
+  			{% for user in findUsers if limit != searchCounter+1 %}
+  				{% if email == user.email %}
+	  				<tr>
+		                <td>{{limit}}</td>
+		                <td>{{user.email}}</td>
+		                <td>{{user.name}}</td>
+		                <td>{{user.surname}}</td>
+		                <td>{{user.phoneNumber}}</td>
+		                <td>{{user.city}}</td>
+		                <td>{{user.userType}}</td> 
+		                <td><a href="/editUser/{{user.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
+		                {% if user.blocked == FALSE %}
+		                	<td><a href="/blockUser/{{user.id}}" class="btn btn-danger btn-sm btn-block">Zablokuj</a></td>
+		                {% endif %}
+		                {% if user.blocked == TRUE %}
+	                		<td><a href="/blockUser/{{user.id}}" class="btn btn-success btn-sm btn-block">Odblokuj</a></td>
+	                	{% endif %}
+		            </tr>
+		            {% set limit = limit+1 %}
+	            {% endif %}
+      		{% endfor %}
+      	{% endif %}
+
+      	{% if defaultSearchCounter is defined %}
+  			{% set limit = 1 %}
+  			{% for user in findUsers if limit != defaultSearchCounter+1 %}
+  				<tr>
+	                <td>{{limit}}</td>
+	                <td>{{user.email}}</td>
+	                <td>{{user.name}}</td>
+	                <td>{{user.surname}}</td>
+	                <td>{{user.phoneNumber}}</td>
+	                <td>{{user.city}}</td>
+	                <td>{{user.userType}}</td> 
+	                <td><a href="/editUser/{{user.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
+	                {% if user.blocked == FALSE %}
+		                <td><a href="/blockUser/{{user.id}}" class="btn btn-danger btn-sm btn-block">Zablokuj</a></td>
+		            {% endif %}
+		            {% if user.blocked == TRUE %}
+	                	<td><a href="/blockUser/{{user.id}}" class="btn btn-success btn-sm btn-block">Odblokuj</a></td>
+	                {% endif %}
+	            </tr>
+  			{% set limit = limit+1 %}
+      		{% endfor %}
+      	{% endif %}	
+  	</tbody>
+</table>
 
 {% endblock %}

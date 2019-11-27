@@ -46,6 +46,16 @@ class Users
      */
     private $user_type;
 
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    private $city;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $blocked;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +129,30 @@ class Users
     public function setUserType(string $user_type): self
     {
         $this->user_type = $user_type;
+
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(string $city): self
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    public function getBlocked(): ?bool
+    {
+        return $this->blocked;
+    }
+
+    public function setBlocked(bool $blocked): self
+    {
+        $this->blocked = $blocked;
 
         return $this;
     }

@@ -28,8 +28,8 @@ class MainController extends AbstractController
         }
 
         return $this->render('main/index.html.twig', [
-                'currentUser' => $currentUser,
-            ]); 
+            'currentUser' => $currentUser,
+        ]); 
     }
 
     /**
@@ -84,6 +84,8 @@ class MainController extends AbstractController
             $user->setSurname($data['surname']);
             $user->setPhoneNumber($data['phone']);
             $user->setUserType("user");
+            $user->setCity($data['city']);
+            $user->setBlocked(FALSE);
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -119,9 +121,17 @@ class MainController extends AbstractController
             {
                 if(password_verify($data['password'], $checkEmail->getPassword())) // if password for this email is correct 
                 {
-                    // create login session
-                    $session->set('currentUser', $checkEmail);
-                    return $this->redirectToRoute('index');
+                    if($checkEmail->getBlocked() == FALSE)
+                    {
+                        // create login session
+                        $session->set('currentUser', $checkEmail);
+                        return $this->redirectToRoute('index');
+                    }
+
+                    else
+                    {
+                        $errorLogin = TRUE;
+                    }
                 }
 
                 else
@@ -170,8 +180,8 @@ class MainController extends AbstractController
         // users ads panel
 
         return $this->render('main/usersAds.html.twig', [
-                'currentUser' => $currentUser,
-            ]); 
+            'currentUser' => $currentUser,
+        ]); 
     }
 
     /**
@@ -198,14 +208,14 @@ class MainController extends AbstractController
         // admin panel for manage ads
 
         return $this->render('main/manageAds.html.twig', [
-                'currentUser' => $currentUser,
-            ]); 
+            'currentUser' => $currentUser,
+        ]); 
     }
 
     /**
      * @Route("/manageUsers", name="manageUsers")
      */
-    public function manageUsers(SessionInterface $session)
+    public function manageUsers(Request $request, SessionInterface $session)
     {
         // check if user is logged
         if($session->get('currentUser'))
@@ -223,12 +233,169 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-        // admin panel for manage users
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+        $defaultSearchCounter = 5;
+
+        // find in the db all users from the newest
+        $findUsers = $entityManager->getRepository(Users::class)->findBy([],['id'=>'DESC']);
+
+        if(isset($data['search']))
+        {
+            $searchCounter = $data['inputState'];
+            $email = $data['email'];
+
+            return $this->render('main/manageUsers.html.twig', [
+                'currentUser' => $currentUser,
+                'findUsers' => $findUsers,
+                'searchCounter' => $searchCounter,
+                'email' => $email,
+            ]); 
+
+        }
 
         return $this->render('main/manageUsers.html.twig', [
-                'currentUser' => $currentUser,
-            ]); 
+            'currentUser' => $currentUser,
+            'findUsers' => $findUsers,
+            'defaultSearchCounter' => $defaultSearchCounter,
+        ]); 
     }
 
+    /**
+     * @Route("/blockUser/{id}", name="blockUser")
+     */
+    public function blockUser($id, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
 
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $user = $entityManager->getRepository(Users::class)->find($id);    
+
+        if($user->getBlocked() == FALSE) // block user
+        {
+            $user->setBlocked(TRUE);
+            $entityManager->persist($user);
+            $entityManager->flush(); 
+            return $this->redirectToRoute('manageUsers');
+        }
+
+        if($user->getBlocked() == TRUE) // unblock user
+        {
+            $user->setBlocked(FALSE);
+            $entityManager->persist($user);
+            $entityManager->flush(); 
+            return $this->redirectToRoute('manageUsers');
+        } 
+    }
+
+    /**
+     * @Route("/editUser/{id}", name="editUser")
+     */
+    public function editUser($id, Request $request,SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+        $user = $entityManager->getRepository(Users::class)->find($id); 
+
+        if(isset($data['edit']))
+        {
+            $checkEmail = $entityManager->getRepository(Users::class)->findOneBy(array('email' => $data['email']));
+
+            if($checkEmail && $checkEmail != $user) // if email address exists in the database and is diffrent from currently edited email
+            {
+                $errorMail = TRUE;
+                return $this->render('main/editUser.html.twig', [
+                    'currentUser' => $currentUser,
+                    'user' => $user,
+                    'errorMail' => $errorMail,
+                ]);
+            }
+
+            $user->setEmail($data['email']);
+
+            if($data['password']) // if password is set in form
+            {
+                if(strlen($data['password']) < 8) // if password is shorter than 8
+                {
+                    $errorPassword = TRUE;
+                    return $this->render('main/editUser.html.twig', [
+                        'currentUser' => $currentUser,
+                        'user' => $user,
+                        'errorPassword' => $errorPassword,
+                    ]);
+                }
+
+                if($data['password'] != $data['repassword']) // if passwords are mismatched
+                {
+                    $errorRePassword = TRUE;
+                    return $this->render('main/editUser.html.twig', [
+                        'currentUser' => $currentUser,
+                        'user' => $user,
+                        'errorRePassword' => $errorRePassword,
+                    ]);
+                }
+
+                $storedPassword = password_hash($data['password'], PASSWORD_DEFAULT); // password hashing
+                $user->setPassword($storedPassword);
+            }
+            
+            $user->setName($data['name']);
+            $user->setSurname($data['surname']);
+            $user->setPhoneNumber($data['phone']);
+            $user->setCity($data['city']);
+
+            if($data['blocked'] == "no")
+            {
+                $user->setBlocked(FALSE);
+            }
+            if($data['blocked'] == "yes")
+            {
+                $user->setBlocked(TRUE);
+            }
+
+            if($data['userType']) // if userType was changed in form
+            {
+                $user->setUserType($data['userType']);
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+        return $this->render('main/editUser.html.twig', [
+            'currentUser' => $currentUser,
+            'user' => $user,
+
+        ]);
+    }
 }
