@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+{% block title %}Dodaj kategorie{% endblock %}
+{% block body %}
+	{# include navbar #}
+	{% if currentUser == FALSE %}
+		{% include 'navbars/guestNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType is defined %}
+		{% if currentUser.userType == "user" %}
+			{% include 'navbars/userNavbar.html.twig' %}
+		{% endif %}
+		{% if currentUser.userType == "admin" %}
+			{% include 'navbars/adminNavbar.html.twig' %}
+		{% endif %}
+	{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header">
+					<center><h3>Edytuj kategorie</h3></center>
+				</div>
+				<div class="card-body">
+					<div class="container">
+						<div class="row">
+							<div class="col">
+								<form method="POST" action="/editCategory/{{category.id}}">
+									
+									<fieldset class="form-group">
+										<div class="form-group">
+											<label class="form-control-label">Nazwa</label>
+											<input class="form-control form-control-lg" id="name" name="name" required type="text" value="{{category.name}}">
+										</div>
+										<div class="form-group">
+											<label class="form-control-label">Opis</label>
+											<textarea class="form-control form-control-lg" id="description" name="description"  type="text">{{category.description}}</textarea>
+										</div>
+									</fieldset>
+									<div class="form-group">
+										<input class="btn btn-primary" id="edit" name="edit" type="submit" value="Zapisz">
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

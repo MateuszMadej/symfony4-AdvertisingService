@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% block title %}Kategorie ogłoszeń{% endblock %}
+{% block body %}
+	{# include navbar #}
+	{% if currentUser == FALSE %}
+		{% include 'navbars/guestNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType is defined %}
+		{% if currentUser.userType == "user" %}
+			{% include 'navbars/userNavbar.html.twig' %}
+		{% endif %}
+		{% if currentUser.userType == "admin" %}
+			{% include 'navbars/adminNavbar.html.twig' %}
+		{% endif %}
+	{% endif %}
+	&nbsp;&nbsp;&nbsp;
+	<div class="row">
+		<div class="col-md-6 offset-md-4">
+			<h3>Zarządzanie kategoriami ogłoszeń</h3>
+		</div>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<tr class="table-secondary">
+				<th scope="col">#</th>
+				<th scope="col">Nazwa Kategorii</th>
+				<th scope="col">Opis</th>
+				<th scope="col">Data dodania</th>
+				<th scope="col"></th>
+				<th scope="col"></th>
+			</tr>
+		</thead>
+		<tbody>
+		    {% set limit = 1 %}
+			{% for category in categories %}
+				<tr>
+					<td>{{limit}}</td>
+					<td>{{category.name}}</td>
+					<td>{{category.description}}</td>
+					<td>{{category.modifyDate|date('Y-m-d H:i:s')}}</td>
+					<td><a href="/editCategory/{{category.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
+					<td><a href="/deleteCategory/{{category.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
+				</tr>
+			{% set limit = limit+1 %}
+			{% endfor %}
+		</tbody>
+	</table>
+	<div class="col-md-12 text-center"> 
+		<a class="btn btn-primary" href="/addCategory" role="button">Dodaj kategorie</a>
+	</div>
+{% endblock %}

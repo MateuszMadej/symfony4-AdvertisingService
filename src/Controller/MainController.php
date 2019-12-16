@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Users;
+use App\Entity\AdsCategories;
 use \DateTime;
 
 class MainController extends AbstractController
@@ -395,6 +396,183 @@ class MainController extends AbstractController
         return $this->render('main/editUser.html.twig', [
             'currentUser' => $currentUser,
             'user' => $user,
+
+        ]);
+    }
+
+    /**
+     * @Route("/manageCategories", name="manageCategories")
+     */
+    public function manageCategories(Request $request, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // find in the db all users from the newest
+        $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'DESC']);
+
+        // admin panel for manage ads
+
+        return $this->render('main/manageCategories.html.twig', [
+            'currentUser' => $currentUser,
+            'categories' => $findCategories,
+        ]); 
+    }
+
+    /**
+     * @Route("/addCategory", name="addCategory")
+     */
+        public function addCategory(Request $request, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+
+        if(isset($data['add']))
+        {
+            $checkName = $entityManager->getRepository(AdsCategories::class)->findOneBy(array('name' => $data['name']));
+
+            if($checkName) 
+            {
+                $errorName = TRUE;
+                return $this->render('main/addCategory.html.twig', [
+                    'errorName' => $errorName,
+                    'currentUser' => $currentUser,
+                ]);
+            }
+        
+
+            $category = new AdsCategories();
+            $category->setName($data['name']);
+            $category->setDescription($data['description']);
+            $category->setModifyDate(new \DateTime('@'.strtotime('now')));
+
+            $entityManager->persist($category);
+            $entityManager->flush();
+
+
+            return $this->redirectToRoute('manageCategories');
+        }
+
+        return $this->render('main/addCategory.html.twig', [
+            'currentUser' => $currentUser,
+        ]); 
+    }
+
+    /**
+     * @Route("/deleteCategory/{id}", name="deleteCategory")
+     */
+    public function deleteCategory($id, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $category = $entityManager->getRepository(AdsCategories::class)->find($id);    
+        
+        $entityManager->remove($category);
+        $entityManager->flush();
+        
+        return $this->redirectToRoute('manageCategories');
+         
+    }
+
+    /**
+     * @Route("/editCategory/{id}", name="editCategory")
+     */
+    public function editCategory($id, Request $request,SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+        $category = $entityManager->getRepository(AdsCategories::class)->find($id); 
+
+        if(isset($data['edit']))
+        {
+            $checkName = $entityManager->getRepository(AdsCategories::class)->findOneBy(array('name' => $data['name']));
+
+            if($checkName && $checkName != $category)
+            {
+                $errorName = TRUE;
+                return $this->render('main/editCategory.html.twig', [
+                    'currentUser' => $currentUser,
+                    'category' => $category,
+                    'errorName' => $errorName,
+                ]);
+            }
+
+            $category->setName($data['name']);
+            $category->setDescription($data['description']);
+            $category->setModifyDate(new \DateTime('@'.strtotime('now')));
+
+            $entityManager->persist($category);
+            $entityManager->flush();
+            return $this->redirectToRoute('manageCategories');
+        }
+
+        return $this->render('main/editCategory.html.twig', [
+            'currentUser' => $currentUser,
+            'category' => $category,
 
         ]);
     }
