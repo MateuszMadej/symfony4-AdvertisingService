@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Moje konto{% endblock %}
+
+{% block body %}
+
+{# include navbar #}
+{% if currentUser == FALSE %}
+	{% include 'navbars/guestNavbar.html.twig' %}
+{% endif %}
+{% if currentUser.userType is defined %}
+	{% if currentUser.userType == "user" %}
+		{% include 'navbars/userNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType == "admin" %}
+		{% include 'navbars/adminNavbar.html.twig' %}
+	{% endif %}
+{% endif %}
+&nbsp;&nbsp;&nbsp;
+<div class="col-md-12">
+    <div class="card">
+    	<div class="card-header">
+        	<center><h3>Moje konto</h3></center>
+     	</div>
+    	<div class="card-body">       
+        	<div class="row">
+          	
+          	<div class="col-lg-6 col-sm-12 offset-md-3">
+            <h5 class="card-title">Moje dane</h5>
+            	<div class="card mb-3" style="max-width: 800px;">
+              		<div class="row no-gutters">            		
+                 		&nbsp;&nbsp;
+                 		<img src="https://www.kwsme.com/wp-content/uploads/2016/06/login-user-icon.png" class="img" width="150px" height="150px">
+                		<div class="col-md-8">
+                  			<div class="card-body">
+                  				<p class="card-text "><b>Adres email:</b> {{user.email}} </p>
+                    			<p class="card-text"><b>Imię:</b> {{user.name}} </p>
+                    			<p class="card-text"><b>Nazwisko:</b> {{user.surname}}</p>
+                    			<p class="card-text"><b>Numer telefonu:</b> {{user.phoneNumber}}</p>
+                    			<p class="card-text"><b>Miasto:</b> {{user.city}}</p>
+                    			<p class="card-text"><b>Typ użytkownika:</b> {{user.userType}}</p>
+               				</div>              				
+               			</div>
+                	</div>
+                </div> 
+                <center>
+                    <a href="/deleteMyAccount/{{user.id}}" class="btn btn-danger btn-md">Usuń</a>
+                    <a href="/editMyAccount/{{user.id}}" class="btn btn-warning btn-md">Edytuj</a>
+                </center>
+            </div>
+            
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

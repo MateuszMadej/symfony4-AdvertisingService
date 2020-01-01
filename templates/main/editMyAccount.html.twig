@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edycja danych konta{% endblock %}
+
+{% block body %}
+
+{# include navbar #}
+{% if currentUser == FALSE %}
+	{% include 'navbars/guestNavbar.html.twig' %}
+{% endif %}
+{% if currentUser.userType is defined %}
+	{% if currentUser.userType == "user" %}
+		{% include 'navbars/userNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType == "admin" %}
+		{% include 'navbars/adminNavbar.html.twig' %}
+	{% endif %}
+{% endif %}
+&nbsp;&nbsp;&nbsp;
+
+<div class="row">
+  <div class="col-md-6 offset-md-3">
+    <div class="content-section">
+      <form method="POST" action="/editMyAccount/{{user.id}}">
+        <fieldset class="form-group">
+          <center><legend class="border-bottom mb-4">Edycja danych konta</legend></center>
+          <div class="form-group">
+            <label class="form-control-label">Email</label>
+            <input class="form-control form-control-lg" id="email" name="email" required type="text" value="{{user.email}}">
+          </div>
+          {% if errorMail is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Podany email jest już zajęty!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          <div class="form-group">
+            <label class="form-control-label">Hasło (podać jedynie gdy chcemy zmienić)</label>
+            <input class="form-control form-control-lg" id="password" name="password" type="password" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Powtórz hasło</label>
+            <input class="form-control form-control-lg" id="repassword" name="repassword" type="password" value="">
+          </div>
+          {% if errorPassword is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Hasło musi składać się z minimum 8 znaków!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          {% if errorRePassword is defined %}
+            <div class="alert alert-danger" align="center" role="alert">
+              <font size="4">
+                <b>Podane hasła są różne!</b>
+                <br>
+              </font>
+            </div>
+          {% endif %}
+          <div class="form-group">
+            <label class="form-control-label">Imię</label>
+            <input class="form-control form-control-lg" id="name" name="name" required type="text" value="{{user.name}}">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Nazwisko</label>
+            <input class="form-control form-control-lg" id="surname" name="surname" required type="text" value="{{user.surname}}">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Numer telefonu</label>
+            <input class="form-control form-control-lg" id="phone" name="phone" required type="text" value="{{user.phoneNumber}}">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label">Miasto</label>
+            <input class="form-control form-control-lg" id="city" name="city" required type="text" value="{{user.city}}">
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <center>
+            <a class="btn btn-secondary" href="/myAccount">Wróć</a> 
+            <input class="btn btn-secondary" id="edit" name="edit" type="submit" value="Zatwierdź">
+          </center>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

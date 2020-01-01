@@ -44,7 +44,6 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-
         $entityManager = $this->getDoctrine()->getManager();
         $data = $request->request->all();
 
@@ -163,9 +162,9 @@ class MainController extends AbstractController
     }
 
     /**
-     * @Route("/usersAds", name="usersAds")
+     * @Route("/myAccount", name="myAccount")
      */
-    public function usersAds(SessionInterface $session)
+    public function myAccount(SessionInterface $session)
     {
         // check if user is logged
         if($session->get('currentUser'))
@@ -178,27 +177,27 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-        // users ads panel
+        $entityManager = $this->getDoctrine()->getManager();
+        
+        // for displaying current data after editing (wont work corrently using session data)
+        $userId = $currentUser->getId();
+        $user = $entityManager->getRepository(Users::class)->find($userId);
 
-        return $this->render('main/usersAds.html.twig', [
+        return $this->render('main/myAccount.html.twig', [
             'currentUser' => $currentUser,
+            'user' => $user,
         ]); 
     }
 
     /**
-     * @Route("/manageAds", name="manageAds")
+     * @Route("/deleteMyAccount/{id}", name="deleteMyAccount")
      */
-    public function manageAds(SessionInterface $session)
+    public function deleteMyAccount($id, SessionInterface $session)
     {
         // check if user is logged
         if($session->get('currentUser'))
         {
             $currentUser = $session->get('currentUser');
-
-            if($currentUser->getUserType() != "admin")
-            {
-                return $this->redirectToRoute('index');
-            }
         }
         else
         {
@@ -206,10 +205,93 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-        // admin panel for manage ads
+        $entityManager = $this->getDoctrine()->getManager();
+        $user = $entityManager->getRepository(Users::class)->find($id);
 
-        return $this->render('main/manageAds.html.twig', [
+        $user->setBlocked(TRUE);
+        $entityManager->persist($user);
+        $entityManager->flush(); 
+
+        $session->remove('currentUser');
+        return $this->redirectToRoute('index');
+    }
+
+    /**
+     * @Route("/editMyAccount/{id}", name="editMyAccount")
+     */
+    public function editMyAccount($id, Request $request, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+        $user = $entityManager->getRepository(Users::class)->find($id);
+
+        if(isset($data['edit']))
+        {
+            $checkEmail = $entityManager->getRepository(Users::class)->findOneBy(array('email' => $data['email']));
+
+            if($checkEmail && $checkEmail != $user) // if email address exists in the database and is diffrent from currently edited email
+            {
+                $errorMail = TRUE;
+                return $this->render('main/editMyAccount.html.twig', [
+                    'currentUser' => $currentUser,
+                    'user' => $user,
+                    'errorMail' => $errorMail,
+                ]);
+            }
+
+            $user->setEmail($data['email']);
+
+            if($data['password']) // if password is set in form
+            {
+                if(strlen($data['password']) < 8) // if password is shorter than 8
+                {
+                    $errorPassword = TRUE;
+                    return $this->render('main/editMyAccount.html.twig', [
+                        'currentUser' => $currentUser,
+                        'user' => $user,
+                        'errorPassword' => $errorPassword,
+                    ]);
+                }
+
+                if($data['password'] != $data['repassword']) // if passwords are mismatched
+                {
+                    $errorRePassword = TRUE;
+                    return $this->render('main/editMyAccount.html.twig', [
+                        'currentUser' => $currentUser,
+                        'user' => $user,
+                        'errorRePassword' => $errorRePassword,
+                    ]);
+                }
+
+                $storedPassword = password_hash($data['password'], PASSWORD_DEFAULT); // password hashing
+                $user->setPassword($storedPassword);
+            }
+            
+            $user->setName($data['name']);
+            $user->setSurname($data['surname']);
+            $user->setPhoneNumber($data['phone']);
+            $user->setCity($data['city']);
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('myAccount');
+        }
+
+        return $this->render('main/editMyAccount.html.twig', [
             'currentUser' => $currentUser,
+            'user' => $user,
         ]); 
     }
 
@@ -396,7 +478,6 @@ class MainController extends AbstractController
         return $this->render('main/editUser.html.twig', [
             'currentUser' => $currentUser,
             'user' => $user,
-
         ]);
     }
 
@@ -421,13 +502,10 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-
         $entityManager = $this->getDoctrine()->getManager();
 
         // find in the db all users from the newest
         $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'DESC']);
-
-        // admin panel for manage ads
 
         return $this->render('main/manageCategories.html.twig', [
             'currentUser' => $currentUser,
@@ -456,7 +534,6 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-
         $entityManager = $this->getDoctrine()->getManager();
         $data = $request->request->all();
 
@@ -473,7 +550,6 @@ class MainController extends AbstractController
                 ]);
             }
         
-
             $category = new AdsCategories();
             $category->setName($data['name']);
             $category->setDescription($data['description']);
@@ -481,7 +557,6 @@ class MainController extends AbstractController
 
             $entityManager->persist($category);
             $entityManager->flush();
-
 
             return $this->redirectToRoute('manageCategories');
         }
@@ -518,8 +593,7 @@ class MainController extends AbstractController
         $entityManager->remove($category);
         $entityManager->flush();
         
-        return $this->redirectToRoute('manageCategories');
-         
+        return $this->redirectToRoute('manageCategories');    
     }
 
     /**
@@ -576,4 +650,57 @@ class MainController extends AbstractController
 
         ]);
     }
+
+    /**
+     * @Route("/usersAds", name="usersAds")
+     */
+    public function usersAds(SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        // users ads panel
+
+        return $this->render('main/usersAds.html.twig', [
+            'currentUser' => $currentUser,
+        ]); 
+    }
+
+    /**
+     * @Route("/manageAds", name="manageAds")
+     */
+    public function manageAds(SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "admin")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        // admin panel for manage ads
+
+        return $this->render('main/manageAds.html.twig', [
+            'currentUser' => $currentUser,
+        ]); 
+    }
+
 }
+
