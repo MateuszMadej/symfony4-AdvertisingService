@@ -1,9 +1,6 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Ogłoszenia{% endblock %}
-
+{% block title %}Twoje ogłoszenia{% endblock %}
 {% block body %}
-
 {# include navbar #}
 {% if currentUser == FALSE %}
 	{% include 'navbars/guestNavbar.html.twig' %}
@@ -16,7 +13,37 @@
 		{% include 'navbars/adminNavbar.html.twig' %}
 	{% endif %}
 {% endif %}
-
-moje ogłoszenia (uzytkownika)
-
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+	<div class="col-md-6 offset-md-4">
+		<h3>Twoje ogłoszenia</h3>&nbsp;
+	</div>
+</div>
+<table class="table table-striped">
+	<thead>
+		<tr class="table-secondary">
+			<th scope="col">#</th>
+			<th scope="col">Tytuł</th>
+			<th scope="col">Data modyfikacji</th>
+			<th scope="col"></th>
+			<th scope="col"></th>
+		</tr>
+	</thead>
+	<tbody>
+	    {% set limit = 1 %}
+		{% for ad in ads %}
+			<tr>
+				<td>{{limit}}</td>
+				<td>{{ad.title}}</td>
+				<td>{{ad.modifyDate|date('Y-m-d H:i:s')}}</td>
+				<td><a href="/editAdvert/{{ad.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
+				<td><a href="/deleteAdvert/{{ad.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
+			</tr>
+		{% set limit = limit+1 %}
+		{% endfor %}
+	</tbody>
+</table>
+<div class="col-md-12 text-center"> 
+	<a class="btn btn-secondary" href="/addAdvert" role="button">Dodaj ogłoszenie</a>
+</div>
 {% endblock %}

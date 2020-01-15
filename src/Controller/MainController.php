@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Users;
 use App\Entity\AdsCategories;
+use App\Entity\Ads;
 use \DateTime;
 
 class MainController extends AbstractController
@@ -652,29 +653,6 @@ class MainController extends AbstractController
     }
 
     /**
-     * @Route("/usersAds", name="usersAds")
-     */
-    public function usersAds(SessionInterface $session)
-    {
-        // check if user is logged
-        if($session->get('currentUser'))
-        {
-            $currentUser = $session->get('currentUser');
-        }
-        else
-        {
-            $currentUser = FALSE;
-            return $this->redirectToRoute('index');
-        }
-
-        // users ads panel
-
-        return $this->render('main/usersAds.html.twig', [
-            'currentUser' => $currentUser,
-        ]); 
-    }
-
-    /**
      * @Route("/manageAds", name="manageAds")
      */
     public function manageAds(SessionInterface $session)
@@ -700,6 +678,153 @@ class MainController extends AbstractController
         return $this->render('main/manageAds.html.twig', [
             'currentUser' => $currentUser,
         ]); 
+    }
+
+        /**
+     * @Route("/usersAds", name="usersAds")
+     */
+    public function usersAds(SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        
+        $userId = $currentUser->getId();
+        $ads = $entityManager->getRepository(Ads::class)->findBy([],['modify_date'=>'DESC']);
+
+        return $this->render('main/usersAds.html.twig', [
+            'currentUser' => $currentUser,
+            'ads' => $ads,
+        ]); 
+    }
+
+    /**
+     * @Route("/addAdvert", name="addAdvert")
+     */
+        public function addAdvert(Request $request, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+
+            if($currentUser->getUserType() != "user")
+            {
+                return $this->redirectToRoute('index');
+            }
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+
+        $entityManager = $this->getDoctrine()->getManager();
+        
+        $userId = $currentUser->getId();
+        $user = $entityManager->getRepository(Users::class)->find($userId);
+        $categories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'ASC']);
+
+        $data = $request->request->all();
+
+        if(isset($data['add']))
+        {
+            $category = $entityManager->getRepository(AdsCategories::class)->find($data['category']);
+            $ads = new Ads();
+            $ads->setTitle($data['title']);
+            $ads->setCategoryId($category);
+            $ads->setDescription($data['description']);
+            $ads->setModifyDate(new \DateTime('@'.strtotime('now')));
+            $ads->setUserId($user);
+
+            $entityManager->persist($ads);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('usersAds');
+        }
+        
+
+        return $this->render('main/addAdvert.html.twig', [
+            'currentUser' => $currentUser,
+            'user' => $user,
+            'categories' => $categories,
+        ]); 
+    }
+
+    /**
+     * @Route("/editAdvert/{id}", name="editAdvert")
+     */
+    public function editAdvert($id, Request $request,SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+        $advert = $entityManager->getRepository(Ads::class)->find($id); 
+        $categories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'ASC']);
+
+        if(isset($data['edit']))
+        {
+
+            $advert->setTitle($data['title']);
+            $advert->setDescription($data['description']);
+            $advert->setModifyDate(new \DateTime('@'.strtotime('now')));
+
+            $entityManager->persist($advert);
+            $entityManager->flush();
+            return $this->redirectToRoute('usersAds');
+        }
+
+        return $this->render('main/editAdvert.html.twig', [
+            'currentUser' => $currentUser,
+            'advert' => $advert,
+            'categories' => $categories,
+
+        ]);
+    }
+
+    /**
+     * @Route("/deleteAdvert/{id}", name="deleteAdvert")
+     */
+    public function deleteAdvert($id, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+            return $this->redirectToRoute('index');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $advert = $entityManager->getRepository(Ads::class)->find($id);    
+        
+        $entityManager->remove($advert);
+        $entityManager->flush();
+        
+        return $this->redirectToRoute('usersAds');    
     }
 
 }

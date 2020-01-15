@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+{% block title %}Dodaj ogłoszenie{% endblock %}
+{% block body %}
+	{# include navbar #}
+	{% if currentUser == FALSE %}
+		{% include 'navbars/guestNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType is defined %}
+		{% if currentUser.userType == "user" %}
+			{% include 'navbars/userNavbar.html.twig' %}
+		{% endif %}
+		{% if currentUser.userType == "admin" %}
+			{% include 'navbars/adminNavbar.html.twig' %}
+		{% endif %}
+	{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header">
+					<center><h3>Dodaj ogłoszenie</h3></center>
+				</div>
+				<div class="card-body">
+					<div class="container">
+						<div class="row">
+							<div class="col-12">
+								<div class="card">
+									<div class="card-body">
+										<h5 class="card-title">Dane kontaktowe</h5>
+										<p class="card-text">
+											<ul class="list-group list-group-flush">
+												<li class="list-group-item">Imię: {{user.name}}</li>
+												<li class="list-group-item">Telefon: {{user.phoneNumber}}</li>
+												<li class="list-group-item">Email: {{user.email}}</li>
+												<li class="list-group-item">Miasto: {{user.city}}</li>
+											</ul>
+										</p>
+									</div>
+								</div>
+							</div>
+							<div class="col">
+								<form method="POST" action="/addAdvert"><br>
+									<fieldset class="form-group">
+										<div class="form-group">
+											<label class="form-control-label">Tytuł</label>
+											<input class="form-control form-control-lg" id="title" name="title" required type="text" value="">
+										</div>
+										<div class="form-group">
+											<label class="form-control-label">Wybierz kategorie:</label>
+											<select class="form-control" id="category" name="category">
+											{% for category in categories %}
+												<option value="{{category.id}}">{{category.name}}</option>
+											{% endfor %}
+											</select>
+										</div>
+										<div class="form-group">
+											<label class="form-control-label">Opis</label>
+											<textarea class="form-control form-control-lg" id="description" name="description"  type="text" value=""></textarea>
+										</div>
+									</fieldset>
+									<div class="form-group">
+										<center>
+										<a class="btn btn-secondary" href="javascript: history.go(-1)">Wróć</a>
+										<input class="btn btn-secondary" id="add" name="add" type="submit" value="Zapisz">
+										</center>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

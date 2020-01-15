@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}Dodaj kategorie{% endblock %}
+{% block title %}Edytuj ogłoszenie{% endblock %}
 {% block body %}
 	{# include navbar #}
 	{% if currentUser == FALSE %}
@@ -17,26 +17,34 @@
 		<div class="col-md-12">
 			<div class="card">
 				<div class="card-header">
-					<center><h3>Edytuj kategorie</h3></center>
+					<center><h3>Edytuj ogłoszenie</h3></center>
 				</div>
 				<div class="card-body">
 					<div class="container">
 						<div class="row">
 							<div class="col">
-								<form method="POST" action="/editCategory/{{category.id}}">
+								<form method="POST" action="/editAdvert/{{advert.id}}">
 									<fieldset class="form-group">
 										<div class="form-group">
-											<label class="form-control-label">Nazwa</label>
-											<input class="form-control form-control-lg" id="name" name="name" required type="text" value="{{category.name}}">
+											<label class="form-control-label">Tytuł</label>
+											<input class="form-control form-control-lg" id="title" name="title" required type="text" value="{{advert.title}}">
+										</div>
+										<div class="form-group">
+											<label class="form-control-label">Wybierz kategorie:</label>
+											<select class="form-control" id="category" name="category">
+											{% for category in categories %}
+												<option value="{{category.id}}">{{category.name}}</option>
+											{% endfor %}
+											</select>
 										</div>
 										<div class="form-group">
 											<label class="form-control-label">Opis</label>
-											<textarea class="form-control form-control-lg" id="description" name="description"  type="text">{{category.description}}</textarea>
+											<textarea class="form-control form-control-lg" id="description" name="description"  type="text">{{advert.description}}</textarea>
 										</div>
 									</fieldset>
 									<div class="form-group">
 										<center>
-											<a class="btn btn-secondary" href="/manageCategories">Wróć</a> 
+											<a class="btn btn-secondary" href="javascript: history.go(-1)">Wróć</a> 
 											<input class="btn btn-secondary" id="edit" name="edit" type="submit" value="Zapisz">
 										</center>
 									</div>
