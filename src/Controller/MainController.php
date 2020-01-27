@@ -7,9 +7,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use App\Entity\Users;
 use App\Entity\AdsCategories;
 use App\Entity\Ads;
+use App\Entity\AdsPhotos;
 use \DateTime;
 
 class MainController extends AbstractController
@@ -17,7 +19,7 @@ class MainController extends AbstractController
     /**
      * @Route("/", name="index")
      */
-    public function index(SessionInterface $session)
+    public function index(Request $request, SessionInterface $session)
     {
         // check if user is logged
         if($session->get('currentUser'))
@@ -29,8 +31,39 @@ class MainController extends AbstractController
             $currentUser = FALSE;
         }
 
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+
+        $findUsers = $entityManager->getRepository(Users::class)->findBy([], ['id' => 'ASC']);
+        $findUsersByCity = $entityManager->getRepository(Users::class)->findBy([], ['city' => 'ASC']);
+        $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
+        $cities = [];
+
+        foreach($findUsersByCity as $userCity) // add only uniques cities
+        {
+            if($userCity->getUserType() != "admin")
+            {
+                if(!in_array($userCity->getCity(), $cities, true))
+                {
+                    array_push($cities, $userCity->getCity());
+                }
+            }
+        }
+
+        if(isset($data['search']))
+        {
+            $adName = $data['name'];
+            $adsCity = $data['city'];
+            $adsCategory = $data['category'];
+
+            // using this data find accurate ads
+        }
+
         return $this->render('main/index.html.twig', [
             'currentUser' => $currentUser,
+            'findUsers' => $findUsers,
+            'findCategories' => $findCategories,
+            'cities' => $cities,
         ]); 
     }
 
@@ -589,7 +622,19 @@ class MainController extends AbstractController
         }
 
         $entityManager = $this->getDoctrine()->getManager();
-        $category = $entityManager->getRepository(AdsCategories::class)->find($id);    
+        $category = $entityManager->getRepository(AdsCategories::class)->find($id); 
+        $findAllCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'ASC']);
+        $findAllAds = $entityManager->getRepository(Ads::class)->findBy([],['id'=>'DESC']);
+
+        foreach($findAllAds as $findAd) // check if category to delete is not used somewhere
+        {
+            if($findAd->getCategoryId()->getName() == $category->getName())
+            {
+                dump("Kategoria jest używana i nie może zostać usunięta!");
+                sleep(2);
+                return $this->redirectToRoute('manageCategories');
+            }
+        }
         
         $entityManager->remove($category);
         $entityManager->flush();
@@ -655,7 +700,7 @@ class MainController extends AbstractController
     /**
      * @Route("/manageAds", name="manageAds")
      */
-    public function manageAds(SessionInterface $session)
+    public function manageAds(Request $request, SessionInterface $session)
     {
         // check if user is logged
         if($session->get('currentUser'))
@@ -673,14 +718,49 @@ class MainController extends AbstractController
             return $this->redirectToRoute('index');
         }
 
-        // admin panel for manage ads
+        $entityManager = $this->getDoctrine()->getManager();
+        $data = $request->request->all();
+
+        $findUsers = $entityManager->getRepository(Users::class)->findBy([], ['id' => 'ASC']);
+        $findUsersByCity = $entityManager->getRepository(Users::class)->findBy([], ['city' => 'ASC']);
+        $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
+        $cities = [];
+
+        foreach($findUsersByCity as $userCity) // add only uniques cities
+        {
+            if($userCity->getUserType() != "admin")
+            {
+                if(!in_array($userCity->getCity(), $cities, true))
+                {
+                    array_push($cities, $userCity->getCity());
+                }
+            }
+        }
+
+        if(isset($data['search']))
+        {
+            $adName = $data['name'];
+            $adsCity = $data['inputState'];
+            $adsCategory = $data['category'];
+            
+            return $this->render('main/manageAds.html.twig', [
+                'currentUser' => $currentUser,
+                'findUsers' => $findUsers,
+                'findCategories' => $findCategories,
+                'cities' => $cities,
+                'adName' => $adName,
+            ]);
+        }
 
         return $this->render('main/manageAds.html.twig', [
             'currentUser' => $currentUser,
+            'findUsers' => $findUsers,
+            'findCategories' => $findCategories,
+            'cities' => $cities,
         ]); 
     }
 
-        /**
+    /**
      * @Route("/usersAds", name="usersAds")
      */
     public function usersAds(SessionInterface $session)
@@ -747,6 +827,23 @@ class MainController extends AbstractController
             $ads->setModifyDate(new \DateTime('@'.strtotime('now')));
             $ads->setUserId($user);
 
+            if($request->files->get('upFile'))
+            {
+                $file = $request->files->get('upFile');
+                $fileName = sha1(random_bytes(14)).".".$file->getClientOriginalExtension();
+
+                $file->move(
+                    $this->getParameter('files_directory'),
+                    $fileName
+                );
+
+                $adPhoto = new AdsPhotos(); 
+                $adPhoto->setFile($fileName);
+                $adPhoto->setAd($ads);
+
+                $entityManager->persist($adPhoto);
+            }
+
             $entityManager->persist($ads);
             $entityManager->flush();
 
@@ -781,23 +878,52 @@ class MainController extends AbstractController
         $data = $request->request->all();
         $advert = $entityManager->getRepository(Ads::class)->find($id); 
         $categories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'ASC']);
+        $advertFiles = $entityManager->getRepository(AdsPhotos::class)->findBy(['ad' => $advert]);
 
         if(isset($data['edit']))
         {
-
             $advert->setTitle($data['title']);
             $advert->setDescription($data['description']);
             $advert->setModifyDate(new \DateTime('@'.strtotime('now')));
 
+            if($request->files->get('upFile'))
+            {
+                $file = $request->files->get('upFile');
+                $fileName = sha1(random_bytes(14)).".".$file->getClientOriginalExtension();
+
+                $file->move(
+                    $this->getParameter('files_directory'),
+                    $fileName
+                );
+
+                $adPhoto = new AdsPhotos(); 
+                $adPhoto->setFile($fileName);
+                $adPhoto->setAd($advert);
+
+                $entityManager->persist($adPhoto);
+            }
+
             $entityManager->persist($advert);
             $entityManager->flush();
+
             return $this->redirectToRoute('usersAds');
+        }
+
+        if(isset($data['delete']))
+        {
+            foreach($advertFiles as $advertFile)
+            {
+                $entityManager->remove($advertFile);
+            }
+
+            $entityManager->flush();
         }
 
         return $this->render('main/editAdvert.html.twig', [
             'currentUser' => $currentUser,
             'advert' => $advert,
             'categories' => $categories,
+            'advertFiles' => $advertFiles,
 
         ]);
     }
@@ -819,8 +945,14 @@ class MainController extends AbstractController
         }
 
         $entityManager = $this->getDoctrine()->getManager();
-        $advert = $entityManager->getRepository(Ads::class)->find($id);    
-        
+        $advert = $entityManager->getRepository(Ads::class)->find($id);  
+        $advertFiles = $entityManager->getRepository(AdsPhotos::class)->findBy(['ad' => $advert]);
+
+        foreach($advertFiles as $advertFile)
+        {
+            $entityManager->remove($advertFile);
+        }
+
         $entityManager->remove($advert);
         $entityManager->flush();
         

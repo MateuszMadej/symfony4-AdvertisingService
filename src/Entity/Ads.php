@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -42,6 +44,16 @@ class Ads
      * @ORM\JoinColumn(nullable=false)
      */
     private $category_id;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\AdsPhotos", mappedBy="ad")
+     */
+    private $adsPhotos;
+
+    public function __construct()
+    {
+        $this->adsPhotos = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -104,6 +116,37 @@ class Ads
     public function setCategoryId(?AdsCategories $category_id): self
     {
         $this->category_id = $category_id;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|AdsPhotos[]
+     */
+    public function getAdsPhotos(): Collection
+    {
+        return $this->adsPhotos;
+    }
+
+    public function addAdsPhoto(AdsPhotos $adsPhoto): self
+    {
+        if (!$this->adsPhotos->contains($adsPhoto)) {
+            $this->adsPhotos[] = $adsPhoto;
+            $adsPhoto->setAd($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdsPhoto(AdsPhotos $adsPhoto): self
+    {
+        if ($this->adsPhotos->contains($adsPhoto)) {
+            $this->adsPhotos->removeElement($adsPhoto);
+            // set the owning side to null (unless already changed)
+            if ($adsPhoto->getAd() === $this) {
+                $adsPhoto->setAd(null);
+            }
+        }
 
         return $this;
     }

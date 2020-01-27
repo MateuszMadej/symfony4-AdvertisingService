@@ -17,6 +17,72 @@
 	{% endif %}
 {% endif %}
 
-panel admina do zarzadzania ogloszeniami
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <form method="POST" action="/manageAds">
+            <fieldset class="form-group">
+              <div class="form-row">
+                <legend class="border-bottom mb-4">Ogłoszenia</legend>
+                <div class="col-6">
+                  <div class="form-group">
+                      <label class="form-control-label">Nazwa (opcjonalnie)</label>
+                      <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Kategoria</label>
+                      <select id="category" name="category" class="form-control form-control-lg">
+                          {% for category in findCategories %}
+                            <option value="{{category.name}}">{{category.name}}</option>    
+                          {% endfor %}
+                      </select>
+                  </div>
+              </div>
+                <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Miejscowość</label>
+                      <select id="inputState" name="inputState" class="form-control form-control-lg">
+	                  	{% for city in cities %}
+	                        	<option value="{{city}}">{{city}}</option>    
+	                    {% endfor %}
+                      </select>
+                  </div>
+              </div>
+              </div>
+            </fieldset>
+            <div class="form-group">
+                <center>
+                    <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj"> 
+                </center>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr class="table-secondary">
+            <th scope="col">#</th>
+            <th scope="col">Tytuł</th>
+            <th scope="col">Data modyfikacji</th>
+            <th scope="col">Użytkownik</th>
+            <th scope="col">Kategoria</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% if adName is defined %}
+            {% if adName == "" %}
+
+            {% endif %}
+        {% endif %}
+
+    </tbody>
+
+</table>
 
 {% endblock %}

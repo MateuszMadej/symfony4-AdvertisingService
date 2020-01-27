@@ -17,6 +17,62 @@
 	{% endif %}
 {% endif %}
 
-main page
+&nbsp;&nbsp;&nbsp;
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <form method="POST" action="/">
+            <fieldset class="form-group">
+              <div class="form-row">
+                <legend class="border-bottom mb-4">Ogłoszenia</legend>
+                <div class="col-6">
+                  <div class="form-group">
+                      <label class="form-control-label">Nazwa (opcjonalnie)</label>
+                      <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Kategoria</label>
+                      <select id="category" name="category" class="form-control form-control-lg">
+                          {% for category in findCategories %}
+                            <option value="{{category.name}}">{{category.name}}</option>    
+                          {% endfor %}
+                      </select>
+                  </div>
+              </div>
+                <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Miejscowość</label>
+                      <select id="city" name="city" class="form-control form-control-lg">
+                      	{% if currentUser == FALSE %}
+	                      	{% for city in cities %}
+	                        	<option value="{{city}}">{{city}}</option>    
+	                        {% endfor %}
+                        {% endif %}
+                        {% if currentUser.userType is defined %}
+                        	{% for city in cities %}                       	
+	                         	{% if currentUser.city != city %}
+	                         		<option value="{{city}}">{{city}}</option>
+	                         	{% endif %}
+	                         	{% if currentUser.city == city %}
+	                         		<option value="{{city}}" selected>{{city}}</option>
+	                         	{% endif %}   
+	                        {% endfor %}
+                        {% endif %}
+                      </select>
+                  </div>
+              </div>
+              </div>
+            </fieldset>
+            <div class="form-group">
+                <center>
+                    <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj"> 
+                </center>
+            </div>
+        </form>
+    </div>
+</div>
+
+<center>Tutaj może jakieś ogólne ogłoszenia, np. ostatnio dodane ogólnie i z twojej miejscowości, po jakieś 10-20 ogłoszeń żeby fajnie wyglądało, wyszukiwarka może przerzucać nas po prostu na inną podstrone</center>
 
 {% endblock %}

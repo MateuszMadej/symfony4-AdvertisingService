@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}Twoje ogłoszenia{% endblock %}
+{% block title %}Moje ogłoszenia{% endblock %}
 {% block body %}
 {# include navbar #}
 {% if currentUser == FALSE %}
@@ -14,11 +14,13 @@
 	{% endif %}
 {% endif %}
 &nbsp;&nbsp;&nbsp;
+<center>
 <div class="row">
-	<div class="col-md-6 offset-md-4">
-		<h3>Twoje ogłoszenia</h3>&nbsp;
+	<div class="col-md-6 offset-md-3">
+		<h3>Moje ogłoszenia</h3>
 	</div>
-</div>
+</div>&nbsp;
+</center>
 <table class="table table-striped">
 	<thead>
 		<tr class="table-secondary">
