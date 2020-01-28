@@ -1,88 +1,67 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Ogłoszenia{% endblock %}
-
 {% block body %}
-
-{# include navbar #}
-{% if currentUser == FALSE %}
-	{% include 'navbars/guestNavbar.html.twig' %}
-{% endif %}
-{% if currentUser.userType is defined %}
-	{% if currentUser.userType == "user" %}
-		{% include 'navbars/userNavbar.html.twig' %}
-	{% endif %}
-	{% if currentUser.userType == "admin" %}
-		{% include 'navbars/adminNavbar.html.twig' %}
-	{% endif %}
-{% endif %}
-
-&nbsp;&nbsp;&nbsp;
-<div class="row">
+  {# include navbar #}
+  {% if currentUser == FALSE %}
+    {% include 'navbars/guestNavbar.html.twig' %}
+  {% endif %}
+  {% if currentUser.userType is defined %}
+    {% if currentUser.userType == "user" %}
+      {% include 'navbars/userNavbar.html.twig' %}
+    {% endif %}
+    {% if currentUser.userType == "admin" %}
+      {% include 'navbars/adminNavbar.html.twig' %}
+    {% endif %}
+  {% endif %}
+  &nbsp;&nbsp;&nbsp;
+  <div class="row">
     <div class="col-md-6 offset-md-3">
-        <form method="POST" action="/manageAds">
-            <fieldset class="form-group">
-              <div class="form-row">
-                <legend class="border-bottom mb-4">Ogłoszenia</legend>
-                <div class="col-6">
-                  <div class="form-group">
-                      <label class="form-control-label">Nazwa (opcjonalnie)</label>
-                      <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group">
-                      <label for="inputState">Kategoria</label>
-                      <select id="category" name="category" class="form-control form-control-lg">
-                          {% for category in findCategories %}
-                            <option value="{{category.name}}">{{category.name}}</option>    
-                          {% endfor %}
-                      </select>
-                  </div>
+      <form method="POST" action="/manageAds">
+        <fieldset class="form-group">
+          <div class="form-row">
+            <legend class="border-bottom mb-4">Ogłoszenia</legend>
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-control-label">Nazwa</label>
+                <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
               </div>
-                <div class="col">
-                  <div class="form-group">
-                      <label for="inputState">Miejscowość</label>
-                      <select id="inputState" name="inputState" class="form-control form-control-lg">
-	                  	{% for city in cities %}
-	                        	<option value="{{city}}">{{city}}</option>    
-	                    {% endfor %}
-                      </select>
-                  </div>
-              </div>
-              </div>
-            </fieldset>
-            <div class="form-group">
-                <center>
-                    <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj"> 
-                </center>
             </div>
-        </form>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <center>
+          <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj">
+          </center>
+        </div>
+      </form>
     </div>
-</div>
-
-<table class="table table-striped">
+  </div>
+  <table class="table table-striped">
     <thead>
-        <tr class="table-secondary">
-            <th scope="col">#</th>
-            <th scope="col">Tytuł</th>
-            <th scope="col">Data modyfikacji</th>
-            <th scope="col">Użytkownik</th>
-            <th scope="col">Kategoria</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-        </tr>
+      <tr class="table-secondary">
+        <th scope="col">#</th>
+        <th scope="col">Tytuł</th>
+        <th scope="col">Data modyfikacji</th>
+        <th scope="col">Użytkownik</th>
+        <th scope="col">Kategoria</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+      </tr>
     </thead>
-
     <tbody>
-        {% if adName is defined %}
-            {% if adName == "" %}
-
-            {% endif %}
-        {% endif %}
-
+      {% set limit = 1 %}
+      {% for ad in allAds %}
+        <tr>
+          <td>{{limit}}</td>
+          <td><a href="/advertisement/{{ad.id}}">{{ad.title}}</a></td>
+          <td>{{ad.modifyDate|date('Y-m-d H:i:s')}}</td>
+          <td>{{ad.getUserId.email}}</td>
+          <td>{{ad.getCategoryId.name}}</td>
+          <td><a href="/deleteAdvert/{{ad.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
+          <td></td>
+        </tr>
+        {% set limit = limit+1 %}
+      {% endfor %}
     </tbody>
-
-</table>
-
+  </table>
 {% endblock %}

@@ -1,78 +1,96 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Strona główna{% endblock %}
-
 {% block body %}
-
-{# include navbar #}
-{% if currentUser == FALSE %}
-	{% include 'navbars/guestNavbar.html.twig' %}
-{% endif %}
-{% if currentUser.userType is defined %}
-	{% if currentUser.userType == "user" %}
-		{% include 'navbars/userNavbar.html.twig' %}
-	{% endif %}
-	{% if currentUser.userType == "admin" %}
-		{% include 'navbars/adminNavbar.html.twig' %}
-	{% endif %}
-{% endif %}
-
-&nbsp;&nbsp;&nbsp;
-<div class="row">
+  {# include navbar #}
+  {% if currentUser == FALSE %}
+    {% include 'navbars/guestNavbar.html.twig' %}
+  {% endif %}
+  {% if currentUser.userType is defined %}
+    {% if currentUser.userType == "user" %}
+      {% include 'navbars/userNavbar.html.twig' %}
+    {% endif %}
+    {% if currentUser.userType == "admin" %}
+      {% include 'navbars/adminNavbar.html.twig' %}
+    {% endif %}
+  {% endif %}
+  &nbsp;&nbsp;&nbsp;
+  <div class="row">
     <div class="col-md-6 offset-md-3">
-        <form method="POST" action="/">
-            <fieldset class="form-group">
-              <div class="form-row">
-                <legend class="border-bottom mb-4">Ogłoszenia</legend>
-                <div class="col-6">
-                  <div class="form-group">
-                      <label class="form-control-label">Nazwa (opcjonalnie)</label>
-                      <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group">
-                      <label for="inputState">Kategoria</label>
-                      <select id="category" name="category" class="form-control form-control-lg">
-                          {% for category in findCategories %}
-                            <option value="{{category.name}}">{{category.name}}</option>    
-                          {% endfor %}
-                      </select>
-                  </div>
+      <form method="POST" action="/">
+        <fieldset class="form-group">
+          <div class="form-row">
+            <legend class="border-bottom mb-4">Ogłoszenia</legend>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-control-label">Nazwa (opcjonalnie)</label>
+                <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
               </div>
-                <div class="col">
-                  <div class="form-group">
-                      <label for="inputState">Miejscowość</label>
-                      <select id="city" name="city" class="form-control form-control-lg">
-                      	{% if currentUser == FALSE %}
-	                      	{% for city in cities %}
-	                        	<option value="{{city}}">{{city}}</option>    
-	                        {% endfor %}
-                        {% endif %}
-                        {% if currentUser.userType is defined %}
-                        	{% for city in cities %}                       	
-	                         	{% if currentUser.city != city %}
-	                         		<option value="{{city}}">{{city}}</option>
-	                         	{% endif %}
-	                         	{% if currentUser.city == city %}
-	                         		<option value="{{city}}" selected>{{city}}</option>
-	                         	{% endif %}   
-	                        {% endfor %}
-                        {% endif %}
-                      </select>
-                  </div>
-              </div>
-              </div>
-            </fieldset>
-            <div class="form-group">
-                <center>
-                    <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj"> 
-                </center>
             </div>
-        </form>
+            <div class="col">
+              <div class="form-group">
+                <label for="inputState">Kategoria</label>
+                <select id="category" name="category" class="form-control form-control-lg">
+                  {% for category in findCategories %}
+                    <option value="{{category.name}}">{{category.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="inputState">Miejscowość</label>
+                <select id="city" name="city" class="form-control form-control-lg">
+                  {% if currentUser == FALSE %}
+                    {% for city in cities %}
+                      <option value="{{city}}">{{city}}</option>
+                    {% endfor %}
+                  {% endif %}
+                  {% if currentUser.userType is defined %}
+                    {% for city in cities %}
+                      {% if currentUser.city != city %}
+                        <option value="{{city}}">{{city}}</option>
+                      {% endif %}
+                      {% if currentUser.city == city %}
+                        <option value="{{city}}" selected>{{city}}</option>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <center>
+          <input class="btn btn-dark" id="search" name="search" type="submit" value="Szukaj">
+          </center>
+        </div>
+      </form>
     </div>
-</div>
-
-<center>Tutaj może jakieś ogólne ogłoszenia, np. ostatnio dodane ogólnie i z twojej miejscowości, po jakieś 10-20 ogłoszeń żeby fajnie wyglądało, wyszukiwarka może przerzucać nas po prostu na inną podstrone</center>
-
-{% endblock %}
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="card">
+          <h5 class="card-header">Ostatnio dodane ogłoszenia</h5>
+          <div class="card-body">
+            <div class="row">
+              {% if lastAds %}
+                {% for i in 0..lastAds|length-1 %}
+                  <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="card text-center">
+                      <img src="/photos/{{photos[i][0].file}}" class="card-img-top" height="200px" width="245px">
+                      <div class="card-body">
+                        <h5 class="card-title"><a href="/advertisement/{{lastAds[i].id}}">{{lastAds[i].title}}</a></h5>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="alert alert-danger" role="alert">Brak dodanych ogłoszeń!</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ogłoszenie - {{ad.title}}{% endblock %}
+{% block body %}
+	{# include navbar #}
+	{% if currentUser == FALSE %}
+		{% include 'navbars/guestNavbar.html.twig' %}
+	{% endif %}
+	{% if currentUser.userType is defined %}
+		{% if currentUser.userType == "user" %}
+			{% include 'navbars/userNavbar.html.twig' %}
+		{% endif %}
+		{% if currentUser.userType == "admin" %}
+			{% include 'navbars/adminNavbar.html.twig' %}
+		{% endif %}
+	{% endif %}<br>
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<div class="card text-center">
+					<div class="card-header">
+						<h2>{{ad.title}}</h2>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-6"><img class="img-thumbnail" src="/photos/{{advertFiles[0].file}}" height="auto" width="500px"/></div>
+							<div class="col-6"><div class="card">
+								<div class="card-body">
+									<h5 class="card-title">Dane kontaktowe</h5>
+									<p class="card-text">
+										<ul class="list-group list-group-flush">
+											<li class="list-group-item">Imię: {{adOwner.name}}</li>
+											<li class="list-group-item">Telefon: {{adOwner.phoneNumber}}</li>
+											<li class="list-group-item">Email: {{adOwner.email}}</li>
+											<li class="list-group-item">Miasto: {{adOwner.city}}</li>
+										</ul>
+									</p>
+								</div>
+							</div></div>
+						</div>
+						<h5 class="card-title">Opis</h5>
+						<p class="card-text">{{ad.description}}</p>
+					</div>
+					<div class="card-footer text-muted">
+						Dodano: {{ad.modifyDate|date('Y-m-d H:i:s')}}
+					</div>
+					<a class="btn btn-primary" href="javascript: history.go(-1)">Powrót</a>
+				</div>
+			</div>
+		</div>
+	</div><br>
+{% endblock %}

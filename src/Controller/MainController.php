@@ -39,6 +39,14 @@ class MainController extends AbstractController
         $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
         $cities = [];
 
+        $lastAds = $entityManager->getRepository(Ads::class)->findBy([], ['id' => 'DESC'], 8);
+        $photos = [];
+        foreach($lastAds as $ad)
+        {
+            $photo = $entityManager->getRepository(AdsPhotos::class)->findBy(['ad' => $ad]);
+            array_push($photos, $photo);
+        }
+
         foreach($findUsersByCity as $userCity) // add only uniques cities
         {
             if($userCity->getUserType() != "admin")
@@ -64,6 +72,8 @@ class MainController extends AbstractController
             'findUsers' => $findUsers,
             'findCategories' => $findCategories,
             'cities' => $cities,
+            'lastAds' => $lastAds,
+            'photos' => $photos,
         ]); 
     }
 
@@ -720,43 +730,26 @@ class MainController extends AbstractController
 
         $entityManager = $this->getDoctrine()->getManager();
         $data = $request->request->all();
+        $allAds = $entityManager->getRepository(Ads::class)->findBy([],['id'=>'DESC']);
+        $adsCategory = 0;
 
-        $findUsers = $entityManager->getRepository(Users::class)->findBy([], ['id' => 'ASC']);
-        $findUsersByCity = $entityManager->getRepository(Users::class)->findBy([], ['city' => 'ASC']);
-        $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
-        $cities = [];
-
-        foreach($findUsersByCity as $userCity) // add only uniques cities
-        {
-            if($userCity->getUserType() != "admin")
-            {
-                if(!in_array($userCity->getCity(), $cities, true))
-                {
-                    array_push($cities, $userCity->getCity());
-                }
-            }
-        }
 
         if(isset($data['search']))
         {
             $adName = $data['name'];
-            $adsCity = $data['inputState'];
-            $adsCategory = $data['category'];
+            $allAds = $entityManager->getRepository(Ads::class)->findBy(['title' => $adName]);
             
             return $this->render('main/manageAds.html.twig', [
                 'currentUser' => $currentUser,
-                'findUsers' => $findUsers,
-                'findCategories' => $findCategories,
-                'cities' => $cities,
                 'adName' => $adName,
+                'allAds' => $allAds,
             ]);
         }
 
         return $this->render('main/manageAds.html.twig', [
             'currentUser' => $currentUser,
-            'findUsers' => $findUsers,
-            'findCategories' => $findCategories,
-            'cities' => $cities,
+            'allAds' => $allAds,
+            'adsCategory' => $adsCategory,
         ]); 
     }
 
@@ -955,9 +948,41 @@ class MainController extends AbstractController
 
         $entityManager->remove($advert);
         $entityManager->flush();
-        
-        return $this->redirectToRoute('usersAds');    
+        if($currentUser->getUserType() == "admin")
+        {
+            return $this->redirectToRoute('manageAds');
+        }
+        else {
+          return $this->redirectToRoute('usersAds');
+        }
     }
 
+    /**
+     * @Route("/advertisement/{id}", name="advertisement")
+     */
+    public function advertisement($id, SessionInterface $session)
+    {
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        
+        $ad = $entityManager->getRepository(Ads::class)->find($id);
+        $adOwner = $ad->getUserId();
+        $advertFiles = $entityManager->getRepository(AdsPhotos::class)->findBy(['ad' => $ad]);
+
+        return $this->render('main/advertisement.html.twig', [
+            'ad' => $ad,
+            'currentUser' => $currentUser,
+            'adOwner' => $adOwner,
+            'advertFiles' => $advertFiles,
+        ]); 
+    }
 }
 

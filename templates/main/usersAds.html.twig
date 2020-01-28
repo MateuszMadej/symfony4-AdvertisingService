@@ -36,7 +36,7 @@
 		{% for ad in ads %}
 			<tr>
 				<td>{{limit}}</td>
-				<td>{{ad.title}}</td>
+				<td><a href="/advertisement/{{ad.id}}">{{ad.title}}</a></td>
 				<td>{{ad.modifyDate|date('Y-m-d H:i:s')}}</td>
 				<td><a href="/editAdvert/{{ad.id}}" class="btn btn-warning btn-sm btn-block">Edytuj</a></td>
 				<td><a href="/deleteAdvert/{{ad.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
