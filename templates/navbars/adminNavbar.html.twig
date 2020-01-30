@@ -10,6 +10,10 @@
         <a class="nav-link" href="/"><b>Strona główna</b></a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="/myAccount"><b>Moje konto</b></a>
+      </li>
+
+      {# <li class="nav-item">
         <a class="nav-link" href="/manageUsers"><b>Użytkownicy</b></a>
       </li>
       <li class="nav-item">
@@ -17,11 +21,19 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/manageAds"><b>Ogłoszenia</b></a>
-      </li>
+      </li> #}
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <b><font size="3">Zarządzanie</font></b>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/manageUsers">Użytkownicy</a>
+            <a class="dropdown-item" href="/manageAds">Ogłoszenia</a>
+            <a class="dropdown-item" href="/manageCategories">Kategorie</a>
+        </div>
+    </li>  
       
-      <li class="nav-item">
-        <a class="nav-link" href="/myAccount"><b>Moje konto</b></a>
-      </li>
     </ul>
     <span class="navbar-text">
       Zalogowany jako: <b>{{currentUser.email}}</b> (admin)&nbsp;&nbsp;&nbsp;&nbsp;

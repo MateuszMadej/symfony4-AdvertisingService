@@ -20,12 +20,26 @@
         <fieldset class="form-group">
           <div class="form-row">
             <legend class="border-bottom mb-4">Ogłoszenia</legend>
-            <div class="col-12">
+            <div class="col-10">
               <div class="form-group">
-                <label class="form-control-label">Nazwa</label>
+                <label class="form-control-label">Nazwa (opcjonalnie)</label>
                 <input class="form-control form-control-lg" id="name" name="name" type="text" value="">
               </div>
             </div>
+            <div class="col">
+                  <div class="form-group">
+                      <label for="inputState">Ilość </label>
+                      <select id="inputState" name="inputState" class="form-control form-control-lg">
+                          <option>5</option>
+                          <option>10</option>
+                          <option>25</option>
+                          <option>50</option>
+                          <option>100</option>
+                          <option>250</option>
+                          <option>500</option>
+                      </select>
+                  </div>
+              </div>
           </div>
         </fieldset>
         <div class="form-group">
@@ -36,6 +50,8 @@
       </form>
     </div>
   </div>
+  
+
   <table class="table table-striped">
     <thead>
       <tr class="table-secondary">
@@ -49,8 +65,44 @@
       </tr>
     </thead>
     <tbody>
+
+    {% if searchCounter is defined and adName == "" %}
+        {% set limit = 1 %}
+        {% for ad in findAds if limit != searchCounter+1 %}
+            <tr>
+              <td>{{limit}}</td>
+              <td><a href="/advertisement/{{ad.id}}">{{ad.title}}</a></td>
+              <td>{{ad.modifyDate|date('Y-m-d H:i:s')}}</td>
+              <td>{{ad.getUserId.email}}</td>
+              <td>{{ad.getCategoryId.name}}</td>
+              <td><a href="/deleteAdvert/{{ad.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
+              <td></td>
+            </tr>
+            {% set limit = limit+1 %}
+        {% endfor %}
+    {% endif %}
+
+    {% if searchCounter is defined and adName != "" %}
+        {% set limit = 1 %}
+        {% for ad in findAds if limit != searchCounter+1 %}
+            {% if adName == ad.title %}
+                <tr>    
+                  <td>{{limit}}</td>
+                  <td><a href="/advertisement/{{ad.id}}">{{ad.title}}</a></td>
+                  <td>{{ad.modifyDate|date('Y-m-d H:i:s')}}</td>
+                  <td>{{ad.getUserId.email}}</td>
+                  <td>{{ad.getCategoryId.name}}</td>
+                  <td><a href="/deleteAdvert/{{ad.id}}" class="btn btn-danger btn-sm btn-block">Usuń</a></td>
+                  <td></td>
+                </tr>
+            {% endif %}
+            {% set limit = limit+1 %}
+        {% endfor %}
+    {% endif %}
+
+    {% if defaultSearchCounter is defined %}
       {% set limit = 1 %}
-      {% for ad in allAds %}
+      {% for ad in allAds if limit != defaultSearchCounter+1 %}
         <tr>
           <td>{{limit}}</td>
           <td><a href="/advertisement/{{ad.id}}">{{ad.title}}</a></td>
@@ -62,6 +114,8 @@
         </tr>
         {% set limit = limit+1 %}
       {% endfor %}
+    {% endif %} 
+
     </tbody>
   </table>
 {% endblock %}

@@ -39,8 +39,9 @@ class MainController extends AbstractController
         $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
         $cities = [];
 
-        $lastAds = $entityManager->getRepository(Ads::class)->findBy([], ['id' => 'DESC'], 8);
+        $lastAds = $entityManager->getRepository(Ads::class)->findBy([], ['id' => 'DESC'], 12);
         $photos = [];
+
         foreach($lastAds as $ad)
         {
             $photo = $entityManager->getRepository(AdsPhotos::class)->findBy(['ad' => $ad]);
@@ -61,10 +62,16 @@ class MainController extends AbstractController
         if(isset($data['search']))
         {
             $adName = $data['name'];
+
+            if(!$adName)
+            {
+                $adName  = "none";
+            }
+
             $adsCity = $data['city'];
             $adsCategory = $data['category'];
 
-            // using this data find accurate ads
+            return $this->redirectToRoute('offers', ['name' => $adName, 'city' => $adsCity, 'category' => $adsCategory]);
         }
 
         return $this->render('main/index.html.twig', [
@@ -74,6 +81,55 @@ class MainController extends AbstractController
             'cities' => $cities,
             'lastAds' => $lastAds,
             'photos' => $photos,
+        ]); 
+    }
+
+    /**
+     * @Route("/offers/{name}/{city}/{category}", name="offers")
+     */
+    public function offers($name, $city, $category, SessionInterface $session)
+    {
+        // check if user is logged
+        if($session->get('currentUser'))
+        {
+            $currentUser = $session->get('currentUser');
+        }
+        else
+        {
+            $currentUser = FALSE;
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+    
+        $findUsers = $entityManager->getRepository(Users::class)->findBy([], ['id' => 'ASC']);
+        $findUsersByCity = $entityManager->getRepository(Users::class)->findBy([], ['city' => 'ASC']);
+        $findCategories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
+        $cities = [];
+
+        foreach($findUsersByCity as $userCity) // add only uniques cities
+        {
+            if($userCity->getUserType() != "admin")
+            {
+                if(!in_array($userCity->getCity(), $cities, true))
+                {
+                    array_push($cities, $userCity->getCity());
+                }
+            }
+        }
+
+        $adsByTitle = $entityManager->getRepository(Ads::class)->findOneBy(array('title' => $name));
+        $allAds = $entityManager->getRepository(Ads::class)->findBy([], ['id' => 'ASC']);
+
+        return $this->render('main/offers.html.twig', [
+            'currentUser' => $currentUser,
+            'findUsers' => $findUsers,
+            'findCategories' => $findCategories,
+            'cities' => $cities,
+            'name' => $name,
+            'city' => $city,
+            'category' => $category,
+            'adsByTitle' => $adsByTitle,
+            'allAds' => $allAds,
         ]); 
     }
 
@@ -732,17 +788,21 @@ class MainController extends AbstractController
         $data = $request->request->all();
         $allAds = $entityManager->getRepository(Ads::class)->findBy([],['id'=>'DESC']);
         $adsCategory = 0;
-
+        $defaultSearchCounter = 5;
 
         if(isset($data['search']))
         {
             $adName = $data['name'];
+            $searchCounter = $data['inputState'];
             $allAds = $entityManager->getRepository(Ads::class)->findBy(['title' => $adName]);
+            $findAds = $entityManager->getRepository(Ads::class)->findBy([],['id'=>'DESC']);
             
             return $this->render('main/manageAds.html.twig', [
                 'currentUser' => $currentUser,
                 'adName' => $adName,
                 'allAds' => $allAds,
+                'findAds' => $findAds,
+                'searchCounter' => $searchCounter,
             ]);
         }
 
@@ -750,6 +810,7 @@ class MainController extends AbstractController
             'currentUser' => $currentUser,
             'allAds' => $allAds,
             'adsCategory' => $adsCategory,
+            'defaultSearchCounter' => $defaultSearchCounter,
         ]); 
     }
 
@@ -772,7 +833,7 @@ class MainController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         
         $userId = $currentUser->getId();
-        $ads = $entityManager->getRepository(Ads::class)->findBy([],['modify_date'=>'DESC']);
+        $ads = $entityManager->getRepository(Ads::class)->findBy(['user_id' => $userId],['modify_date'=>'DESC']);
 
         return $this->render('main/usersAds.html.twig', [
             'currentUser' => $currentUser,
@@ -806,7 +867,7 @@ class MainController extends AbstractController
         
         $userId = $currentUser->getId();
         $user = $entityManager->getRepository(Users::class)->find($userId);
-        $categories = $entityManager->getRepository(AdsCategories::class)->findBy([],['id'=>'ASC']);
+        $categories = $entityManager->getRepository(AdsCategories::class)->findBy([],['name'=>'ASC']);
 
         $data = $request->request->all();
 
