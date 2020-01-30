@@ -136,7 +136,7 @@ class MainController extends AbstractController
     /**
      * @Route("/registration", name="registration")
      */
-    public function registration(Request $request, SessionInterface $session)
+    public function registration(Request $request, SessionInterface $session, \Swift_Mailer $mailer)
     {
         // if user is logged redirect to main page
         if($session->get('currentUser'))
@@ -189,6 +189,19 @@ class MainController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $message = (new \Swift_Message('Witaj w AdService!'))
+                ->setFrom('ucmasymfonyapp@gmail.com')
+                ->setTo($data['email'])
+                ->setBody(
+                    $this->renderView(
+                        'emails/welcomeMessage.html.twig',
+                        array('name' => $data['name'], 'surname' => $data['surname']),
+                    ),
+                    'text/html'
+            );
+
+            $mailer->send($message);
 
             // redirect to login page
             return $this->redirectToRoute('login');

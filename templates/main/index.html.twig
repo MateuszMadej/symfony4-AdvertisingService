@@ -75,11 +75,11 @@
           <h5 class="card-header">Ostatnio dodane ogłoszenia</h5>
           <div class="card-body">
             <div class="row">
-              {% if lastAds is defined %}
+              {% if lastAds is defined and lastAds != NULL  %}
                 {% for i in 0..lastAds|length-1 %}
                   <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="card text-center">
-                      <img src="/photos/{{photos[i][0].file}}" class="card-img-top" height="200px" width="245px">
+                        <img src="/photos/{{photos[i][0].file}}" class="card-img-top" height="200px" width="245px">
                       <div class="card-body">
                         <h5 class="card-title"><a href="/advertisement/{{lastAds[i].id}}">{{lastAds[i].title}}</a></h5>
                       </div>
